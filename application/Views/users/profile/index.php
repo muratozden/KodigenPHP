@@ -1,0 +1,1 @@
+Welcome to the <?= $username; ?>'s profile page.

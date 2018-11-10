@@ -25,6 +25,6 @@ class Routes
     public $default_controller = "Home";
 
     public $rules = [
-        "([a-zA-Z0-9]+)" => "Users/Profile:index($1)"
+        "([a-zA-Z0-9]+)" => "Users/Profile:index"
     ];
 }

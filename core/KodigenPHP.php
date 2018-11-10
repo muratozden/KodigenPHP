@@ -51,7 +51,7 @@ class KodigenPHP
             if (method_exists($object, $this->request->method_name)) {
                 $this->loadVariables($object);
                 try {
-                    eval("\$object->{$this->request->method_name}({$this->request->arguments});");
+                    call_user_func_array([$object, $this->request->method_name], (array)$this->request->arguments);
                     return;
                 } catch (\Throwable $e) {
                     $this->setError(500, "{$e->getMessage()} on {$e->getFile()} line {$e->getLine()}");

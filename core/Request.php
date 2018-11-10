@@ -49,14 +49,15 @@ class Request
         } else {
             foreach ($config->routes->rules as $rule => $handler) {
                 if (preg_match("#^\/{$rule}$#", $this->request_uri, $args)) {
+                    $this->arguments = array_slice($args, 1);
 
                     $handler_splitted = explode(":", $handler);
                     $controller_side = $handler_splitted[0];
                     $controller_splitted = explode("/", $controller_side);
-                    $total_controller_split = count($controller_splitted);
 
-                    if ($total_controller_split > 1) {
+                    if (isset($controller_splitted[1])) {
                         # Seems the controller side has more than one path
+                        $total_controller_split = count($controller_splitted);
                         for ($i = 0; $i < $total_controller_split; $i++) {
                             switch ($total_controller_split) {
                                 case $i + 1: # last index
@@ -74,19 +75,7 @@ class Request
 
                     if (isset($handler_splitted[1])) {
                         # Seems the method side is exists
-                        $method_side = $handler_splitted[1];
-                        $method_splitted = explode("(", $method_side);
-                        $total_method_split = count($method_splitted);
-                        if ($total_method_split > 1 && $args) {
-                            # Seems arguments are exists
-                            $total_args = count($args);
-                            $arguments_side = rtrim($method_splitted[1], ")");
-                            $this->arguments = $arguments_side;
-                            for ($i = 1; $i < $total_args; $i++) {
-                                $this->arguments = str_replace('$' . $i, '"' . addslashes(urldecode($args[$i])) . '"', $this->arguments);
-                            }
-                        }
-                        $this->method_name = $method_splitted[0];
+                        $this->method_name = $handler_splitted[1];
                     } else {
                         # Otherwise, set the default method name
                         $this->method_name = "index";

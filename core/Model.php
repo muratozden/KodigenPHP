@@ -24,7 +24,9 @@ class Model
     public $db;
     public $table;
     public $primary = "id";
-    public $last_sql = "";
+
+    private $escape;
+    private $table_escaped;
 
     function __construct(\KodigenPHP\Database &$db = null)
     {
@@ -33,6 +35,25 @@ class Model
         } else {
             $this->db = &$db;
         }
+
+        $this->escape = $this->db->provider->escape;
+        $this->table_escaped = "{$this->escape}{$this->table}{$this->escape}";
+    }
+
+    public function getAll($where = null, $select = "*"): ?array
+    {
+        list($data, $where_str, $settings_str, $select_str) = $this->prepareData($where, null, $select);
+
+        $query = $this->db->prepare("SELECT {$select_str} FROM {$this->table_escaped} {$where_str}");
+        return $query->execute($data) ? $query->fetchAll() : null;
+    }
+
+    public function getFirst($where = null, $select = "*"): ?array
+    {
+        list($data, $where_str, $settings_str, $select_str) = $this->prepareData($where, null, $select);
+
+        $query = $this->db->prepare("SELECT {$select_str} FROM {$this->table_escaped} {$where_str} LIMIT 1");
+        return $query->execute($data) ? $query->fetch() : null;
     }
 
     public function insert(array $data): ?int
@@ -40,12 +61,12 @@ class Model
         $columns = $values = $comma = "";
 
         foreach ($data as $key => $val) {
-            $columns .= "{$comma}{$this->db->provider->escape}{$key}{$this->db->provider->escape}";
+            $columns .= "{$comma}{$this->escape}{$key}{$this->escape}";
             $values .= "{$comma}:{$key}";
             $comma = ", ";
         }
 
-        $query = $this->db->prepare("INSERT INTO {$this->db->provider->escape}{$this->table}{$this->db->provider->escape} ({$columns}) VALUES ({$values})");
+        $query = $this->db->prepare("INSERT INTO {$this->table_escaped} ({$columns}) VALUES ({$values})");
         if ($query->execute($data)) {
             return $this->db->lastInsertId();
         } else {
@@ -57,7 +78,7 @@ class Model
     {
         list($data, $where_str, $settings_str) = $this->prepareData($where, $settings);
 
-        $query = $this->db->prepare("UPDATE {$this->db->provider->escape}{$this->table}{$this->db->provider->escape} {$settings_str} {$where_str}");
+        $query = $this->db->prepare("UPDATE {$this->table_escaped} {$settings_str} {$where_str}");
         return $query->execute($data);
     }
 
@@ -65,25 +86,33 @@ class Model
     {
         list($data, $where_str) = $this->prepareData($where);
 
-        $query = $this->db->prepare("DELETE FROM {$this->db->provider->escape}{$this->table}{$this->db->provider->escape} {$where_str}");
+        $query = $this->db->prepare("DELETE FROM {$this->table_escaped} {$where_str}");
         return $query->execute($data);
     }
 
-    private function prepareData($where, array $settings = []): ?array
+    private function prepareData($where, $settings = [], $select = []): ?array
     {
-        $where_str = $settings_str = "";
+        $where_str = $settings_str = $select_str = "";
         $data = [];
 
-        if (is_numeric($where)) {
-            $where = ["id" => $where];
+        if ($select) {
+            if (is_array($select)) {
+                $comma = "";
+                foreach ($select as $col) {
+                    $select_str .= "{$comma}{$this->escape}{$col}{$this->escape}";
+                    $comma = ", ";
+                }
+            } else {
+                $select_str = $select;
+            }
         }
 
         if ($settings) {
             $settings_str = "SET ";
             $comma = "";
-            foreach ($settings as $key => $val) {
-                $settings_str .= "{$comma}{$this->db->provider->escape}{$key}{$this->db->provider->escape}=:__SET{$key}";
-                $data["__SET{$key}"] = $val;
+            foreach ($settings as $col => $val) {
+                $settings_str .= "{$comma}{$this->escape}{$col}{$this->escape}=:set_{$col}";
+                $data["set_{$col}"] = $val;
                 $comma = ", ";
             }
         }
@@ -91,13 +120,14 @@ class Model
         if ($where) {
             $where_str = "WHERE ";
             $comma = "";
-            foreach ($where as $key => $val) {
-                $where_str .= "{$comma}{$this->db->provider->escape}{$key}{$this->db->provider->escape}=:__EXP{$key}";
-                $data["__EXP{$key}"] = $val;
+            $where = is_numeric($where) ? ["id" => $where] : $where;
+            foreach ($where as $col => $val) {
+                $where_str .= "{$comma}{$this->escape}{$col}{$this->escape}=:exp_{$col}";
+                $data["exp_{$col}"] = $val;
                 $comma = ", ";
             }
         }
 
-        return [$data, $where_str, $settings_str];
+        return [$data, $where_str, $settings_str, $select_str];
     }
 }

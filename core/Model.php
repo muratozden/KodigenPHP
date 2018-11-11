@@ -29,7 +29,7 @@ class Model
     private $escape;
     private $table_escaped;
 
-    private $select;
+    private $select = "*";
 
     function __construct(\KodigenPHP\Database &$db = null)
     {

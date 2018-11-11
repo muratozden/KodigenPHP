@@ -125,7 +125,8 @@ class QueryBuilder
         return $temp;
     }
 
-    public function insertData(array $data) {
+    public function insertData(array $data)
+    {
         $columns = $values = $comma = "";
         foreach ($data as $key => $val) {
             $columns .= "{$comma}{$this->escape}{$key}{$this->escape}";

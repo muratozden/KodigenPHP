@@ -45,19 +45,27 @@ class View
         unset($this->params[$key]);
     }
 
-    public function load(string $filename)
+    public function load(string $name)
     {
         extract($this->params);
-        require APP . "/Views/{$filename}.php";
+        require APP . "/Views/{$name}.php";
     }
 
-    public function params() {
+    public function layout(string $view_name, string $layout_name = "default")
+    {
+        extract($this->params);
+        $view = APP . "/Views/{$view_name}.php";
+        require APP . "/Views/layouts/{$layout_name}.php";
+    }
+
+    public function params()
+    {
         return $this->params;
     }
 
     public static function getInstance()
     {
-        if (! self::$instance) {
+        if (!self::$instance) {
             self::$instance = new View();
         }
 

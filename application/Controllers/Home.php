@@ -24,7 +24,9 @@ class Home extends \KodigenPHP\Controller
 {
     public function index()
     {
+        $this->view->title   = "Homepage";
         $this->view->welcome = "KodigenPHP!";
-        $this->view->load("home/index");
+
+        $this->view->layout("home/index");
     }
 }

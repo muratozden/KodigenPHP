@@ -19,8 +19,8 @@
  * @copyright 2018-2019 Kodigen
  * @license Apache License 2.0
  */
-class Example extends \KodigenPHP\Model
+class User extends \KodigenPHP\Model
 {
-    public $table = "example";
+    public $table = "users";
     public $primary = "id";
 }

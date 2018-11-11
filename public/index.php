@@ -22,5 +22,5 @@
 
 define("PUB", __DIR__);
 define("ENV", isset($_SERVER["ENV"]) ? $_SERVER["ENV"] : "dev");
-$application = require(PUB . "/../core/bootstrap.php");
+$application = require PUB . "/../core/bootstrap.php";
 $application->run();

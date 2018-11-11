@@ -26,6 +26,7 @@ class Profile extends \KodigenPHP\Controller
     public function index($username)
     {
         $this->view->username = $username;
-        $this->view->load("users/profile/index");
+
+        $this->view->layout("users/profile/index");
     }
 }

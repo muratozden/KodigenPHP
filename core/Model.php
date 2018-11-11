@@ -22,8 +22,10 @@
 class Model
 {
     public $db;
+
     public $table;
     public $primary = "id";
+    public $fetch = \PDO::FETCH_ASSOC;
 
     private $escape;
     private $table_escaped;
@@ -40,20 +42,20 @@ class Model
         $this->table_escaped = "{$this->escape}{$this->table}{$this->escape}";
     }
 
-    public function getAll($where = null, $select = "*"): ?array
-    {
-        list($data, $where_str, $settings_str, $select_str) = $this->prepareData($where, null, $select);
-
-        $query = $this->db->prepare("SELECT {$select_str} FROM {$this->table_escaped} {$where_str}");
-        return $query->execute($data) ? $query->fetchAll() : null;
-    }
-
-    public function getFirst($where = null, $select = "*"): ?array
+    public function get($where = null, $select = null)
     {
         list($data, $where_str, $settings_str, $select_str) = $this->prepareData($where, null, $select);
 
         $query = $this->db->prepare("SELECT {$select_str} FROM {$this->table_escaped} {$where_str} LIMIT 1");
-        return $query->execute($data) ? $query->fetch() : null;
+        return $query->execute($data) ? $query->fetch($this->fetch) : false;
+    }
+
+    public function getAll($where = null, $select = null)
+    {
+        list($data, $where_str, $settings_str, $select_str) = $this->prepareData($where, null, $select);
+
+        $query = $this->db->prepare("SELECT {$select_str} FROM {$this->table_escaped} {$where_str}");
+        return $query->execute($data) ? $query->fetchAll($this->fetch) : false;
     }
 
     public function insert(array $data): ?int
@@ -74,7 +76,7 @@ class Model
         }
     }
 
-    public function update($where, array $settings = []): bool
+    public function update(array $where, array $settings = []): bool
     {
         list($data, $where_str, $settings_str) = $this->prepareData($where, $settings);
 
@@ -95,19 +97,17 @@ class Model
         $where_str = $settings_str = $select_str = "";
         $data = [];
 
-        if ($select) {
-            if (is_array($select)) {
-                $comma = "";
-                foreach ($select as $col) {
-                    $select_str .= "{$comma}{$this->escape}{$col}{$this->escape}";
-                    $comma = ", ";
-                }
-            } else {
-                $select_str = $select;
+        if (is_array($select)) {
+            $comma = "";
+            foreach ($select as $col) {
+                $select_str .= "{$comma}{$this->escape}{$col}{$this->escape}";
+                $comma = ", ";
             }
+        } else {
+            $select_str = "*";
         }
 
-        if ($settings) {
+        if (is_array($settings)) {
             $settings_str = "SET ";
             $comma = "";
             foreach ($settings as $col => $val) {
@@ -117,7 +117,7 @@ class Model
             }
         }
 
-        if ($where) {
+        if (is_array($where)) {
             $where_str = "WHERE ";
             $comma = "";
             $where = is_numeric($where) ? ["id" => $where] : $where;

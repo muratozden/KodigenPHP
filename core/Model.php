@@ -78,4 +78,14 @@ class Model extends \KodigenPHP\Database\QueryBuilder
         $this->resetBuilder();
         return $this->db->lastInsertId();
     }
+
+    public function delete($where = null) {
+        if ($where) $this->where($where);
+
+        $query = $this->getQuery(\KodigenPHP\Database\QueryBuilder::TYPE_DELETE, $this->table);
+        $state = $this->db->prepare($query);
+        $state->execute($this->getPrepareData());
+        $this->resetBuilder();
+        return true;
+    }
 }

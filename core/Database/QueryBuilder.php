@@ -176,6 +176,12 @@ class QueryBuilder
                 $query .= $this->builder_limit ? $this->builder_limit : "";
                 $query .= $this->builder_offset ? $this->builder_offset : "";
                 break;
+            case self::TYPE_DELETE:
+                $query .= "DELETE FROM " . ($this->builder_table ? $this->builder_table : $this->escapeKey($table));
+                $query .= $this->builder_where ? $this->builder_where : "";
+                $query .= $this->builder_limit ? $this->builder_limit : "";
+                $query .= $this->builder_offset ? $this->builder_offset : "";
+                break;
         }
 
         echo $query;

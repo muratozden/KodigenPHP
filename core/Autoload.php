@@ -30,6 +30,7 @@ class Autoload
             "Database",
             "Request",
             "Session",
+            "Common",
             "KodigenPHP",
             "Model",
             "View",

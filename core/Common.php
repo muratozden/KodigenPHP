@@ -20,20 +20,12 @@
  * @license Apache License 2.0
  */
 
-if (PHP_VERSION_ID < 70100) {
-    die("KodigenPHP requires minimum PHP version 7.1");
+function helper(string $name) {
+    require APP . "/Helpers/{$name}.php";
 }
 
-define("ROOT", dirname(__DIR__));
-define("CORE", ROOT . "/core");
-define("APP" , ROOT . "/application");
-
-require CORE . "/Autoload.php";
-
-$autoload = new \KodigenPHP\Autoload();
-$autoload->init();
-spl_autoload_register([$autoload, "register"]);
-
-$application = new \KodigenPHP\KodigenPHP();
-$application->init();
-return $application;
+function view(string $name, array $custom_params = []) {
+    extract(\KodigenPHP\View::getInstance()->params());
+    extract($custom_params);
+    return require APP . "/Views/{$name}.php";
+}

@@ -47,10 +47,12 @@ class View
 
     public function load(string $filename)
     {
-        foreach ($this->params as $key => $val) {
-            $$key = $val;
-        }
+        extract($this->params);
         require APP . "/Views/{$filename}.php";
+    }
+
+    public function params() {
+        return $this->params;
     }
 
     public static function getInstance()

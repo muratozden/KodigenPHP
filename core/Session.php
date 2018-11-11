@@ -30,19 +30,23 @@ class Session
         session_start($config->session->options);
     }
 
-    public function set(string $key, $val) {
+    public function set(string $key, $val)
+    {
         $_SESSION[$key] = $val;
     }
 
-    public function get(string $key) {
+    public function get(string $key)
+    {
         return isset($_SESSION[$key]) ? $_SESSION[$key] : null;
     }
 
-    public function delete(string $key) {
+    public function delete(string $key)
+    {
         unset($_SESSION[$key]);
     }
 
-    public function destroy(): bool {
+    public function destroy(): bool
+    {
         return session_destroy();
     }
 

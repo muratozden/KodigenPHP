@@ -38,7 +38,8 @@ class Model extends \KodigenPHP\Database\QueryBuilder
         }
     }
 
-    public function get($where = null) {
+    public function get($where = null)
+    {
         if ($where) $this->where($where);
 
         $this->limit(1);
@@ -49,7 +50,8 @@ class Model extends \KodigenPHP\Database\QueryBuilder
         return $state->fetch($this->fetch_as);
     }
 
-    public function getAll($where = null) {
+    public function getAll($where = null)
+    {
         if ($where) $this->where($where);
 
         $query = $this->getQuery(\KodigenPHP\Database\QueryBuilder::TYPE_SELECT, $this->table);
@@ -59,7 +61,8 @@ class Model extends \KodigenPHP\Database\QueryBuilder
         return $state->fetchAll($this->fetch_as);
     }
 
-    public function update($where = null, $data = []) {
+    public function update($where = null, $data = [])
+    {
         if ($where) $this->where($where);
 
         $this->set($data);
@@ -70,7 +73,8 @@ class Model extends \KodigenPHP\Database\QueryBuilder
         return true;
     }
 
-    public function insert(array $data): ?string {
+    public function insert(array $data): ?string
+    {
         $this->insertData($data);
         $query = $this->getQuery(\KodigenPHP\Database\QueryBuilder::TYPE_INSERT, $this->table);
         $state = $this->db->prepare($query);
@@ -79,7 +83,8 @@ class Model extends \KodigenPHP\Database\QueryBuilder
         return $this->db->lastInsertId();
     }
 
-    public function delete($where = null) {
+    public function delete($where = null)
+    {
         if ($where) $this->where($where);
 
         $query = $this->getQuery(\KodigenPHP\Database\QueryBuilder::TYPE_DELETE, $this->table);

@@ -20,11 +20,13 @@
  * @license Apache License 2.0
  */
 
-function helper(string $name) {
+function helper(string $name)
+{
     require APP . "/Helpers/{$name}.php";
 }
 
-function view(string $name, array $custom_params = []) {
+function view(string $name, array $custom_params = [])
+{
     extract(\KodigenPHP\View::getInstance()->params());
     extract($custom_params);
     return require APP . "/Views/{$name}.php";

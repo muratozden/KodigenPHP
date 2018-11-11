@@ -39,9 +39,9 @@ class Config
             $ini = parse_ini_file(ROOT . "/.env", true);
             foreach ($ini as $section => $values) {
                 foreach ($values as $key => $val) {
-                    if ($section === "database" && $key !== "auto_connect") {
-                        $keys = explode(".", $key);
-                        $this->database->{$keys[0]}[$keys[1]] = $val;
+                    $keys = explode(".", $key);
+                    if (isset($keys[1])) {
+                        $this->{$section}->{$keys[0]}[$keys[1]] = $val;
                     } else {
                         $this->{$section}->{$key} = $val;
                     }

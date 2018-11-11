@@ -21,14 +21,15 @@
  */
 class Model
 {
-    public $db;
-
     public $table;
     public $primary = "id";
-    public $fetch = \PDO::FETCH_ASSOC;
+    public $fetch_as = \PDO::FETCH_ASSOC;
 
+    private $db;
     private $escape;
     private $table_escaped;
+
+    private $select;
 
     function __construct(\KodigenPHP\Database &$db = null)
     {
@@ -42,20 +43,27 @@ class Model
         $this->table_escaped = "{$this->escape}{$this->table}{$this->escape}";
     }
 
-    public function get($where = null, $select = null)
-    {
-        list($data, $where_str, $settings_str, $select_str) = $this->prepareData($where, null, $select);
-
-        $query = $this->db->prepare("SELECT {$select_str} FROM {$this->table_escaped} {$where_str} LIMIT 1");
-        return $query->execute($data) ? $query->fetch($this->fetch) : false;
+    public function select($select) {
+        $this->select = $select;
+        return $this;
     }
 
-    public function getAll($where = null, $select = null)
+    public function get($where = null)
     {
-        list($data, $where_str, $settings_str, $select_str) = $this->prepareData($where, null, $select);
+        list($data, $where_str, $settings_str, $select_str) = $this->prepareData($where, null, $this->select);
+        $this->resetBuilder();
+
+        $query = $this->db->prepare("SELECT {$select_str} FROM {$this->table_escaped} {$where_str} LIMIT 1");
+        return $query->execute($data) ? $query->fetch($this->fetch_as) : false;
+    }
+
+    public function getAll($where = null)
+    {
+        list($data, $where_str, $settings_str, $select_str) = $this->prepareData($where, null, $this->select);
+        $this->resetBuilder();
 
         $query = $this->db->prepare("SELECT {$select_str} FROM {$this->table_escaped} {$where_str}");
-        return $query->execute($data) ? $query->fetchAll($this->fetch) : false;
+        return $query->execute($data) ? $query->fetchAll($this->fetch_as) : false;
     }
 
     public function insert(array $data): ?int
@@ -92,6 +100,11 @@ class Model
         return $query->execute($data);
     }
 
+    public function resetBuilder() {
+        $this->select = "*";
+        $this->where = null;
+    }
+
     private function prepareData($where, $settings = [], $select = []): ?array
     {
         $where_str = $settings_str = $select_str = "";
@@ -104,7 +117,7 @@ class Model
                 $comma = ", ";
             }
         } else {
-            $select_str = "*";
+            $select_str = $select;
         }
 
         if (is_array($settings)) {

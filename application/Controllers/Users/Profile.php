@@ -21,8 +21,8 @@
  * @license Apache License 2.0
  */
 
-class Profile extends \KodigenPHP\Controller {
-
+class Profile extends \KodigenPHP\Controller
+{
     public function index($username)
     {
         $this->view->username = $username;

@@ -184,8 +184,6 @@ class QueryBuilder
                 break;
         }
 
-        echo $query;
-
         return $query;
     }
 }

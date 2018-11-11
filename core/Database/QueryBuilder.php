@@ -28,7 +28,7 @@ class QueryBuilder
 
     private $escape;
 
-    private $builder_type;
+    private $builder_type = 0;
     private $builder_select;
     private $builder_set;
     private $builder_table;
@@ -37,6 +37,7 @@ class QueryBuilder
     private $builder_join;
     private $builder_limit;
     private $builder_offset;
+    private $builder_insert_data;
     private $builder_prepare_data = [];
 
     function __construct()
@@ -55,6 +56,7 @@ class QueryBuilder
         $this->builder_join = null;
         $this->builder_limit = null;
         $this->builder_offset = null;
+        $this->builder_insert_data = null;
         $this->builder_prepare_data = [];
     }
 
@@ -123,18 +125,29 @@ class QueryBuilder
         return $temp;
     }
 
+    public function insertData(array $data) {
+        $columns = $values = $comma = "";
+        foreach ($data as $key => $val) {
+            $columns .= "{$comma}{$this->escape}{$key}{$this->escape}";
+            $values .= "{$comma}:{$key}";
+            $comma = ", ";
+            $this->builder_prepare_data["{$key}"] = $val;
+        }
+        $this->builder_insert_data = "({$columns}) VALUES ({$values})";
+    }
+
     public function getPrepareData(): array
     {
         return $this->builder_prepare_data;
     }
 
-    public function assignedValue(array $assigns, string $key = "", string $seperator = ", "): string
+    public function assignedValue(array $assigns, string $prefix = "", string $seperator = ", "): string
     {
         $temp = $comma = "";
         foreach ($assigns as $col => $val) {
-            $temp .= "{$comma}{$this->escape}{$col}{$this->escape}=:{$key}{$col}";
+            $temp .= "{$comma}{$this->escape}{$col}{$this->escape}=:{$prefix}{$col}";
             $comma = $seperator;
-            $this->builder_prepare_data["{$key}{$col}"] = $val;
+            $this->builder_prepare_data["{$prefix}{$col}"] = $val;
         }
         return $temp;
     }
@@ -152,6 +165,10 @@ class QueryBuilder
                 $query .= $this->builder_limit ? $this->builder_limit : "";
                 $query .= $this->builder_offset ? $this->builder_offset : "";
                 break;
+            case self::TYPE_INSERT:
+                $query .= "INSERT INTO " . ($this->builder_table ? $this->builder_table : $this->escapeKey($table));
+                $query .= "{$this->builder_insert_data}";
+                break;
             case self::TYPE_UPDATE:
                 $query .= "UPDATE " . ($this->builder_table ? $this->builder_table : $this->escapeKey($table));
                 $query .= " SET {$this->builder_set}";
@@ -160,6 +177,8 @@ class QueryBuilder
                 $query .= $this->builder_offset ? $this->builder_offset : "";
                 break;
         }
+
+        echo $query;
 
         return $query;
     }

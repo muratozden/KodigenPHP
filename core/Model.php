@@ -59,4 +59,13 @@ class Model extends \KodigenPHP\Database\QueryBuilder
         $this->resetBuilder();
         return $state->fetchAll($this->fetch_as);
     }
+
+    public function insert(array $data): string {
+        $this->insertData($data);
+        $query = $this->getQuery(\KodigenPHP\Database\QueryBuilder::TYPE_INSERT, $this->table);
+        $state = $this->db->prepare($query);
+        $state->execute($this->getPrepareData());
+        $this->resetBuilder();
+        return $this->db->lastInsertId();
+    }
 }

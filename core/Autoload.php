@@ -24,6 +24,7 @@ class Autoload
     private $classes = [
         "core" => [
             "Config",
+            "Database/QueryBuilder",
             "Database/Providers/Mysql",
             "Database/Providers/Postgres",
             "Database",
